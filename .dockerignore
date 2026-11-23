@@ -1,0 +1,16 @@
+.git
+.agents
+node_modules
+.output
+dist
+dist-mcp
+data
+coverage
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.log
+npm-debug.log*
+.DS_Store
+.env
+.env.*

@@ -1,0 +1,47 @@
+name: taskboard
+
+services:
+  web:
+    build:
+      context: .
+    image: taskboard:local
+    restart: unless-stopped
+    environment:
+      TASKBOARD_DB_PATH: /var/lib/taskboard/taskboard.sqlite
+    ports:
+      - "${TASKBOARD_WEB_BIND:-127.0.0.1}:${TASKBOARD_WEB_PORT:-3000}:3000"
+    volumes:
+      - taskboard-data:/var/lib/taskboard
+
+  mcp:
+    image: taskboard:local
+    command: ["node", "dist-mcp/mcp-http.mjs"]
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      TASKBOARD_DB_PATH: /var/lib/taskboard/taskboard.sqlite
+      TASKBOARD_MCP_HOST: 0.0.0.0
+      TASKBOARD_MCP_PORT: "3001"
+    ports:
+      - "${TASKBOARD_MCP_BIND:-127.0.0.1}:${TASKBOARD_MCP_PORT:-3001}:3001"
+    volumes:
+      - taskboard-data:/var/lib/taskboard
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/healthz').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+volumes:
+  taskboard-data:
