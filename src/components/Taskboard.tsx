@@ -1191,6 +1191,30 @@ function BoardSkeleton() {
   )
 }
 
+function randomId(): string {
+  const cryptoObject = globalThis.crypto
+  if (cryptoObject?.randomUUID) {
+    return cryptoObject.randomUUID()
+  }
+
+  // crypto.randomUUID only exists in secure contexts (HTTPS or localhost),
+  // but the board is also served over plain HTTP on the LAN. getRandomValues
+  // works there, so build a UUID v4 from it.
+  const bytes = new Uint8Array(16)
+  if (cryptoObject?.getRandomValues) {
+    cryptoObject.getRandomValues(bytes)
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256)
+    }
+  }
+
+  bytes[6] = (bytes[6] & 0x0f) | 0x40
+  bytes[8] = (bytes[8] & 0x3f) | 0x80
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
 function useLocalActor(): [UserActor, (actor: UserActor | ((current: UserActor) => UserActor)) => void] {
   const [actor, setActor] = useState<UserActor>(defaultActor)
 
@@ -1198,7 +1222,7 @@ function useLocalActor(): [UserActor, (actor: UserActor | ((current: UserActor) 
     const stored = window.localStorage.getItem('taskboard-local-user')
     if (!stored) {
       const next = {
-        id: window.crypto.randomUUID(),
+        id: randomId(),
         name: 'You',
         kind: 'user' as const,
       }
