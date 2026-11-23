@@ -204,6 +204,13 @@ textarea { resize: vertical; }
   margin-bottom: 24px;
 }
 
+.sidebar-bar { display: contents; }
+.sidebar-drawer { display: contents; }
+
+.sidebar-toggle {
+  display: none;
+}
+
 .nav-item,
 .project-item {
   display: grid;
@@ -1274,20 +1281,47 @@ textarea { resize: vertical; }
   .app-shell { display: block; }
 
   .sidebar {
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 15;
     display: grid;
-    grid-template-columns: auto 1fr;
-    height: auto;
-    gap: 10px 16px;
-    padding: 14px;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    max-height: 100dvh;
+    gap: 8px 12px;
+    overflow-y: auto;
+    padding: max(10px, env(safe-area-inset-top)) 14px 10px;
     border-right: 0;
     border-bottom: 1px solid var(--border);
+    overscroll-behavior: contain;
   }
 
   .brand { padding: 0; }
-  .identity-card,
-  .sidebar-section,
-  .mcp-launcher { display: none; }
+
+  .sidebar-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .sidebar-toggle {
+    display: inline-grid;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border-radius: 8px;
+    color: var(--nord4);
+    background: transparent;
+    font-size: 19px;
+    line-height: 1;
+  }
+
+  .sidebar-toggle[aria-expanded='true'] {
+    color: var(--nord6);
+    background: var(--nord3);
+  }
 
   .nav-list {
     display: flex;
@@ -1299,9 +1333,37 @@ textarea { resize: vertical; }
   .nav-item {
     width: auto;
     grid-template-columns: auto 1fr;
+    min-height: 40px;
   }
 
   .nav-item strong { display: none; }
+
+  .sidebar-drawer { display: none; }
+
+  .sidebar.is-expanded .sidebar-drawer {
+    display: grid;
+    grid-column: 1 / -1;
+    gap: 2px;
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .sidebar.is-expanded .identity-card { margin: 0 0 12px; }
+  .sidebar.is-expanded .sidebar-section { margin: 0 0 12px; }
+  .sidebar.is-expanded .mcp-launcher { margin-top: 0; }
+
+  /* Prevent iOS Safari from zooming when focusing inputs < 16px. */
+  input,
+  select,
+  textarea,
+  .search-box input,
+  .identity-name input,
+  .dialog-form input,
+  .task-detail-form input,
+  .dialog-form select,
+  .task-detail-form select { font-size: 16px; }
+
   .workspace { padding: 21px 14px 30px; }
 
   .topbar {
@@ -1321,7 +1383,23 @@ textarea { resize: vertical; }
 
   .summary-card strong { font-size: 20px; }
   .summary-card span { font-size: 9px; }
-  .board-columns { grid-template-columns: repeat(6, minmax(172px, 1fr)); }
+
+  .board-columns {
+    grid-template-columns: repeat(6, min(84vw, 300px));
+    gap: 9px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .board-columns::-webkit-scrollbar { display: none; }
+
+  .status-column {
+    min-height: 62vh;
+    scroll-snap-align: start;
+  }
+
   .archive-view { padding: 15px; }
 
   .archive-intro {
@@ -1330,11 +1408,15 @@ textarea { resize: vertical; }
     gap: 8px;
   }
 
-  .archive-row { align-items: flex-end; }
+  .archive-row {
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
 
   .modal-backdrop {
     align-items: flex-end;
     padding: 0;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .dialog,
@@ -1345,7 +1427,10 @@ textarea { resize: vertical; }
     border-bottom: 0;
     border-left: 0;
     border-radius: 13px 13px 0 0;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
   }
+
+  .detail-panel { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
 }
 
 @media (max-width: 420px) {
@@ -1366,4 +1451,24 @@ textarea { resize: vertical; }
 
   .dialog-actions button,
   .detail-actions button { width: 100%; }
+}
+
+@media (pointer: coarse) {
+  .icon-button { width: 34px; height: 34px; }
+
+  .close-button {
+    width: 38px;
+    height: 38px;
+    font-size: 24px;
+  }
+
+  .nav-item,
+  .project-item { min-height: 44px; }
+
+  .primary-button,
+  .secondary-button,
+  .ghost-button,
+  .danger-button { min-height: 44px; }
+
+  .activity-task-link { padding: 6px 0; }
 }

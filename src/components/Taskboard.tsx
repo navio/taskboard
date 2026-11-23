@@ -104,6 +104,7 @@ function TaskboardContent() {
   const [mcpOpen, setMcpOpen] = useState(false)
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const boardQuery = useQuery({
     queryKey: ['board', view],
@@ -286,29 +287,17 @@ function TaskboardContent() {
 
   return (
     <main className="app-shell">
-      <aside className="sidebar" aria-label="Taskboard navigation">
+      <aside
+        className={`sidebar ${menuOpen ? 'is-expanded' : ''}`}
+        aria-label="Taskboard navigation"
+      >
         <div className="brand">
           <span className="brand-mark">T</span>
           <span>Taskboard</span>
         </div>
 
-        <div className="identity-card">
-          <span className="identity-dot" />
-          <div>
-            <span className="eyebrow">LOCAL USER</span>
-            <label className="identity-name" htmlFor="local-user-name">
-              <span className="sr-only">Your local name</span>
-              <input
-                id="local-user-name"
-                value={actor.name}
-                maxLength={100}
-                onChange={(event) => setActorName(setActor, event.target.value)}
-              />
-            </label>
-          </div>
-        </div>
-
-        <nav className="nav-list">
+        <div className="sidebar-bar">
+          <nav className="nav-list">
           <button
             className={`nav-item ${view === 'board' && !projectFilter ? 'is-active' : ''}`}
             aria-current={view === 'board' && !projectFilter ? 'page' : undefined}
@@ -338,7 +327,35 @@ function TaskboardContent() {
             <span>⌫</span>
             Archive
           </button>
-        </nav>
+          </nav>
+          <button
+            className="sidebar-toggle"
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="sidebar-drawer"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <span className="sr-only">{menuOpen ? 'Close menu' : 'Open menu'}</span>
+            {menuOpen ? '×' : '☰'}
+          </button>
+        </div>
+
+        <div className="sidebar-drawer" id="sidebar-drawer">
+        <div className="identity-card">
+          <span className="identity-dot" />
+          <div>
+            <span className="eyebrow">LOCAL USER</span>
+            <label className="identity-name" htmlFor="local-user-name">
+              <span className="sr-only">Your local name</span>
+              <input
+                id="local-user-name"
+                value={actor.name}
+                maxLength={100}
+                onChange={(event) => setActorName(setActor, event.target.value)}
+              />
+            </label>
+          </div>
+        </div>
 
         <section className="sidebar-section">
           <div className="section-heading">
@@ -361,6 +378,7 @@ function TaskboardContent() {
                   setView('board')
                   setProjectFilter(project.id)
                   setSelectedTaskId(null)
+                  setMenuOpen(false)
                 }}
                 type="button"
               >
@@ -402,13 +420,21 @@ function TaskboardContent() {
           </div>
         </section>
 
-        <button className="mcp-launcher" onClick={() => setMcpOpen(true)} type="button">
+        <button
+          className="mcp-launcher"
+          onClick={() => {
+            setMcpOpen(true)
+            setMenuOpen(false)
+          }}
+          type="button"
+        >
           <span>◇</span>
           <span>
             <b>Agent workspace</b>
             <small>Connect any MCP client</small>
           </span>
         </button>
+        </div>
       </aside>
 
       <section className="workspace">
