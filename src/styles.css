@@ -1287,6 +1287,8 @@ textarea { resize: vertical; }
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
+    align-content: start;
+    height: auto;
     max-height: 100dvh;
     gap: 8px 12px;
     overflow-y: auto;
@@ -1327,6 +1329,7 @@ textarea { resize: vertical; }
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
+    gap: 2px;
     margin: 0;
   }
 
@@ -1334,6 +1337,8 @@ textarea { resize: vertical; }
     width: auto;
     grid-template-columns: auto 1fr;
     min-height: 40px;
+    gap: 6px;
+    padding: 8px;
   }
 
   .nav-item strong { display: none; }
@@ -1431,6 +1436,11 @@ textarea { resize: vertical; }
   }
 
   .detail-panel { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 480px) {
+  .brand { gap: 0; }
+  .brand > span:last-child { display: none; }
 }
 
 @media (max-width: 420px) {
